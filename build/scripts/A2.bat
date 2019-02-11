@@ -63,7 +63,7 @@ set CMD_LINE_ARGS=%*
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\A2.jar
+set CLASSPATH=%APP_HOME%\lib\A2.jar;%APP_HOME%\lib\vecmath.jar
 
 @rem Execute A2
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %A2_OPTS%  -classpath "%CLASSPATH%" main %CMD_LINE_ARGS%

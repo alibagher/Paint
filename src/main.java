@@ -14,6 +14,14 @@ import java.awt.event.ActionListener;
 
 import javax.vecmath.*;
 
+import java.io.*;
+//import java.lang.Object;
+import java.io.Writer;
+import java.io.Reader;
+import java.io.BufferedWriter;
+import java.io.BufferedReader;
+
+
 import java.lang.*;
 import java.lang.Math;
 
@@ -64,17 +72,103 @@ public class main extends JPanel {
             }
         });
 
-        loadOption.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e) {
 
-            }
-        });
         saveOption.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e) {
-                //try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("drawing.txt"), "utf-8"))) {
-                //    writer.write(""+ sList.size());
+                String filename = "src/drawing.txt";
+                try {
+                    PrintWriter writer = new PrintWriter(filename);
+                    writer.print("");
+                    writer.close();
+                    FileWriter fileWriter = new FileWriter(filename);
+                    BufferedWriter bWriter = new BufferedWriter(fileWriter);
 
-                //}
+                    bWriter.write(String.valueOf(sList.size()));
+                    bWriter.newLine();
+                    for (Shape obj1 : sList) {
+                        String c = "";
+                        if (obj1.colour == Color.BLUE) {
+                            c = "blue";
+                        } else if (obj1.colour == Color.RED) {
+                            c = "red";
+                        } else if (obj1.colour == Color.ORANGE) {
+                            c = "orange";
+                        } else if (obj1.colour == Color.YELLOW) {
+                            c = "yellow";
+                        } else if (obj1.colour == Color.GREEN) {
+                            c = "green";
+                        } else if (obj1.colour == Color.PINK) {
+                            c = "pink";
+                        }
+
+                        if (obj1.type == "circle") {
+                            bWriter.write("circle");
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P0.x));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P0.y));
+                            bWriter.newLine();
+                            bWriter.write(c);
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.thick));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.centre.x));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.centre.y));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.diameter));
+                            bWriter.newLine();
+                            if(obj1.fillColor){
+                                bWriter.write(String.valueOf(1));
+                                bWriter.newLine();
+                            }else{
+                                bWriter.write(String.valueOf(0));
+                                bWriter.newLine();
+                            }
+
+                        } else if (obj1.type == "rectangle") {
+                            bWriter.write("rectangle");
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P0.x));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P0.y));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P1.x));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P1.y));
+                            bWriter.newLine();
+                            bWriter.write(c);
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.thick));
+                            bWriter.newLine();
+                            if(obj1.fillColor){
+                                bWriter.write(String.valueOf(1));
+                                bWriter.newLine();
+                            }else{
+                                bWriter.write(String.valueOf(0));
+                                bWriter.newLine();
+                            }
+                        } else if (obj1.type == "line") {
+                            bWriter.write("line");
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P0.x));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P0.y));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P1.x));
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.P1.y));
+                            bWriter.newLine();
+                            bWriter.write(c);
+                            bWriter.newLine();
+                            bWriter.write(String.valueOf(obj1.thick));
+                            bWriter.newLine();
+                        }
+                    }
+                    bWriter.close();
+                }catch (Exception ex){
+                    System.out.println("problem opening file.");
+                }
             }
         });
 
@@ -198,7 +292,7 @@ public class main extends JPanel {
             });
 
 
-            ImageIcon bucketImg = new ImageIcon("src/pictures/bucket.jpg");
+            ImageIcon bucketImg = new ImageIcon("src/pictures/bucket.png");
             // resiez image
             image = bucketImg.getImage(); // transform it
             newimg = image.getScaledInstance(50, 50,  java.awt.Image.SCALE_SMOOTH);
@@ -374,7 +468,7 @@ public class main extends JPanel {
             smallestImg = new ImageIcon(newimg);  // transform it back
             smallest.setIcon(smallestImg);
 
-            ImageIcon mediumImg = new ImageIcon("src/pictures/medium.jpg");
+            ImageIcon mediumImg = new ImageIcon("src/pictures/medium.png");
             // resiez image
             image = mediumImg.getImage(); // transform it
             newimg = image.getScaledInstance(140, 20, java.awt.Image.SCALE_SMOOTH);
@@ -410,7 +504,7 @@ public class main extends JPanel {
 
 
         //canvas
-        main canvas = new main();
+        main canvas = new main(loadOption);
         canvas.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         canvas.setBackground(Color.WHITE);
         // setting the constraints
@@ -448,8 +542,76 @@ public class main extends JPanel {
 
 
     // constructor for the class. looks out for mouse events on the canvas.
-    main(){
+    main(JMenuItem loadOption){
         setBackground(Color.WHITE);
+
+        loadOption.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                //System.exit(0);
+                String filename = "src/drawing.txt";
+                try {
+                    BufferedReader reader = new BufferedReader(new FileReader(filename));
+                    int numShapes = Integer.parseInt(reader.readLine());
+
+                    for(int i =0; i < numShapes; i++) {
+                        String t = reader.readLine();
+                        if(new String (t).equals("circle")) {
+                            Circle circ = new Circle(0, 0, 1);
+                            circ.P0.x = Integer.parseInt(reader.readLine());
+                            circ.P0.y = Integer.parseInt(reader.readLine());
+                            String c = reader.readLine();
+                            if(c == "yellow"){
+                                circ.colour = Color.BLUE;
+                            }
+                            circ.thick = Integer.parseInt(reader.readLine());
+                            circ.centre.x = Integer.parseInt(reader.readLine());
+                            circ.centre.y = Integer.parseInt(reader.readLine());
+                            circ.diameter = Integer.parseInt(reader.readLine());
+                            int ccc = Integer.parseInt(reader.readLine());
+                            if (ccc == 1) {
+                                circ.fillColor = true;
+                            }else{
+                                circ.fillColor = false;
+                            }
+                            sList.add(circ);
+                        }else if(new String (t).equals("rectangle")){
+                            Rectangle re = new Rectangle(0, 0);
+                            re.P0.x = Integer.parseInt(reader.readLine());
+                            re.P0.y = Integer.parseInt(reader.readLine());
+                            re.P1.x = Integer.parseInt(reader.readLine());
+                            re.P1.y = Integer.parseInt(reader.readLine());
+                            String c = reader.readLine();
+                            re.colour = Color.BLUE;
+                            re.thick = Integer.parseInt(reader.readLine());
+                            int ccc = Integer.parseInt(reader.readLine());
+                            if (ccc == 1) {
+                                re.fillColor = true;
+                            }else{
+                                re.fillColor = false;
+                            }
+                            sList.add(re);
+                        }else if(new String (t).equals("line")){
+                            Line l = new Line(new Point(0, 0), setThick);
+                            l.P0.x = Integer.parseInt(reader.readLine());
+                            l.P0.y = Integer.parseInt(reader.readLine());
+                            l.P1.x = Integer.parseInt(reader.readLine());
+                            l.P1.y = Integer.parseInt(reader.readLine());
+                            String c = reader.readLine();
+                            l.colour = Color.BLUE;
+                            l.thick = Integer.parseInt(reader.readLine());
+                            sList.add(l);
+                        }else{
+
+                        }
+                    }
+                    reader.close();
+                }catch(IOException ex){
+                    System.out.println("could not open the file");
+                }
+                repaint();
+            }
+        });
+
         // this is an example of an anonymous inner class
         this.addMouseListener( new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -537,8 +699,6 @@ public class main extends JPanel {
                         //
                         break;
                 }
-                //System.out.println(M.x);
-                //System.out.println(M.y);
                 repaint();
             }
         });
@@ -659,7 +819,7 @@ public class main extends JPanel {
                         cPoint.x = (int)ccPoint.x;
                         cPoint.y = (int)ccPoint.y;
 
-                        if (getDist(M, cPoint) <= 2){
+                        if (getDist(M, cPoint) <= 4){
                             //for(Shape obj1 : sList) {
                             //    obj1.selected = false;
                             //}
@@ -811,7 +971,7 @@ public class main extends JPanel {
         Circle(int x, int y, int r){
             P0.x = x;
             P0.y = y;
-            //centre = m;
+            //centre = M;
             type = "circle";
             colour = setColour;
             thick = setThick;
